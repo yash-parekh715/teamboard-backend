@@ -12,13 +12,16 @@ const registerUser = async (req, res) => {
     const token = createToken(user._id);
 
     res.status(201).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
+      success: true,
       token,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+      },
     });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(400).json({ success: false, error: error.message });
   }
 };
 
@@ -31,13 +34,16 @@ const loginUser = async (req, res) => {
     const token = createToken(user._id);
 
     res.status(200).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
+      success: true,
       token,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+      },
     });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(400).json({ success: false, error: error.message });
   }
 };
 
