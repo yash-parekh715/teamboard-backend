@@ -3,7 +3,7 @@ const {
   createCanvas,
   getUserCanvases,
   getCanvas,
-  addCollaborator,
+  addCollaborator,  
   deleteCanvas,
 } = require("../controllers/canvas.controller");
 const { requireAuth } = require("../middlewares/auth.middleware");

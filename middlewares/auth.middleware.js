@@ -1,8 +1,9 @@
+//middlewares/auth.middleware.js
 const jwt = require("jsonwebtoken");
 const User = require("../models/user.schema");
 
 // Generate JWT token
-const createToken =  (userId) => {
+const createToken = (userId) => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
     expiresIn: "7d",
   });
@@ -32,7 +33,7 @@ const requireAuth = async (req, res, next) => {
 // Socket.io auth middleware
 const socketAuth = async (socket, next) => {
   try {
-    const token = socket.handshake.auth.token;
+    const token = socket.handshake.auth.token || socket.handshake.query.token;
     if (!token) {
       return next(new Error("Authentication required"));
     }

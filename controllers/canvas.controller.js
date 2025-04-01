@@ -1,11 +1,11 @@
 const Canvas = require("../models/canvas.schema");
+const User = require("../models/user.schema");
 const { v4: uuidv4 } = require("uuid");
 
 // Create a new canvas
 const createCanvas = async (req, res) => {
   const { name } = req.body;
   const owner = req.user._id;
-
   try {
     const canvasId = uuidv4();
     const canvas = await Canvas.create({
@@ -24,13 +24,13 @@ const createCanvas = async (req, res) => {
 // Get all canvases for a user
 const getUserCanvases = async (req, res) => {
   const userId = req.user._id;
-
   try {
     const canvases = await Canvas.find({
       $or: [{ owner: userId }, { collaborators: userId }],
     }).sort({ lastModified: -1 });
 
     res.status(200).json(canvases);
+    // console.log(res);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -40,6 +40,7 @@ const getUserCanvases = async (req, res) => {
 const getCanvas = async (req, res) => {
   const { id } = req.params;
   const userId = req.user._id;
+  // console.log(req);
 
   try {
     const canvas = await Canvas.findOne({ canvasId: id });
@@ -111,6 +112,7 @@ const addCollaborator = async (req, res) => {
 const deleteCanvas = async (req, res) => {
   const { id } = req.params;
   const userId = req.user._id;
+  // console.log(req);
 
   try {
     const canvas = await Canvas.findOne({ canvasId: id });
@@ -140,4 +142,3 @@ module.exports = {
   addCollaborator,
   deleteCanvas,
 };
- 
