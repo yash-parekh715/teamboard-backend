@@ -11,6 +11,13 @@ const registerUser = async (req, res) => {
     console.log(user);
     const token = createToken(user._id);
 
+    res.cookie("authToken", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
     res.status(201).json({
       success: true,
       token,
@@ -32,10 +39,14 @@ const loginUser = async (req, res) => {
   try {
     const user = await User.login(email, password);
     const token = createToken(user._id);
-
+    res.cookie("authToken", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
     res.status(200).json({
       success: true,
-      token,
       user: {
         _id: user._id,
         name: user.name,
@@ -50,13 +61,37 @@ const loginUser = async (req, res) => {
 // Google OAuth callback handler
 const googleCallback = (req, res) => {
   const token = createToken(req.user._id);
+  const user = {
+    _id: req.user._id,
+    name: req.user.name,
+    email: req.user.email,
+  };
+  res.cookie("authToken", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
   // Redirect to frontend with token
-  res.redirect(`${process.env.CLIENT_URL}/auth/google/callback?token=${token}`);
+  res.redirect(`${process.env.CLIENT_URL}/auth/google/callback`);
 };
 
+const logoutUser = (req, res) => {
+  res.cookie("authToken", "", {
+    httpOnly: true,
+    expires: new Date(0),
+  });
+  res.status(200).json({ success: true });
+};
 // Get current user profile
 const getCurrentUser = async (req, res) => {
   res.status(200).json(req.user);
 };
 
-module.exports = { registerUser, loginUser, googleCallback, getCurrentUser };
+module.exports = {
+  registerUser,
+  loginUser,
+  googleCallback,
+  getCurrentUser,
+  logoutUser,
+};

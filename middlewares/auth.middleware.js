@@ -9,35 +9,48 @@ const createToken = (userId) => {
   });
 };
 
-// Auth middleware for routes
 const requireAuth = async (req, res, next) => {
-  // Verify authentication
-  const { authorization } = req.headers;
-
-  if (!authorization) {
-    return res.status(401).json({ error: "Authorization token required" });
-  }
-
-  const token = authorization.split(" ")[1];
-
   try {
+    // First try to get token from cookies
+    let token = req.cookies?.authToken;
+
+    // If no cookie, fall back to Authorization header (for backward compatibility)
+    if (!token) {
+      const { authorization } = req.headers;
+      if (!authorization) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      token = authorization.split(" ")[1];
+    }
+
+    // Verify token and attach user to request
     const { id } = jwt.verify(token, process.env.JWT_SECRET);
     req.user = await User.findById(id).select("_id name email");
     next();
   } catch (error) {
-    console.log(error);
+    console.log("Auth middleware error:", error);
     res.status(401).json({ error: "Request is not authorized" });
   }
 };
-
 // Socket.io auth middleware
 const socketAuth = async (socket, next) => {
   try {
-    const token = socket.handshake.auth.token || socket.handshake.query.token;
-    if (!token) {
+    // Extract token from cookie instead of auth.token
+    const cookies = socket.request.headers.cookie;
+    if (!cookies) {
       return next(new Error("Authentication required"));
     }
 
+    // Parse cookies to get the auth token
+    const tokenCookie = cookies
+      .split(";")
+      .find((cookie) => cookie.trim().startsWith("authToken="));
+
+    if (!tokenCookie) {
+      return next(new Error("Authentication token not found"));
+    }
+
+    const token = tokenCookie.split("=")[1];
     const { id } = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(id).select("_id name email");
 
@@ -49,6 +62,7 @@ const socketAuth = async (socket, next) => {
     socket.user = user;
     next();
   } catch (error) {
+    console.error("Socket auth error:", error);
     next(new Error("Invalid authentication"));
   }
 };

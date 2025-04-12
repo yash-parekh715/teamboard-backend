@@ -8,18 +8,26 @@ const passport = require("./config/passport");
 const authRoutes = require("./routes/auth.routes");
 const canvasRoutes = require("./routes/canvas.routes");
 const setupSocketServer = require("./socket/socketManager");
+const cookieParser = require("cookie-parser");
 
 // Create Express app
 const app = express();
 const server = http.createServer(app);
 
 // Middleware
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path} - ${new Date().toISOString()}`);
+  next();
+});
+app.use(cookieParser());
 app.use(express.json());
 app.use(
   cors({
-    // origin: process.env.CLIENT_URL || "http://localhost:3000",
-    origin: "*",
-    // credentials: true,
+    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    // origin: "*",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 app.use(passport.initialize());

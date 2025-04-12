@@ -4,6 +4,7 @@ const {
   loginUser,
   googleCallback,
   getCurrentUser,
+  logoutUser,
 } = require("../controllers/auth.controller");
 const { requireAuth } = require("../middlewares/auth.middleware");
 const passport = require("passport");
@@ -35,5 +36,7 @@ router.get(
 
 // Get current user
 router.get("/me", requireAuth, getCurrentUser);
+
+router.post("/logout", requireAuth, logoutUser);
 
 module.exports = router;

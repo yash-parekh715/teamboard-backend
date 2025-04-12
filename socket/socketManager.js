@@ -1,12 +1,12 @@
 const socketIo = require("socket.io");
 const { socketAuth } = require("../middlewares/auth.middleware");
 const Canvas = require("../models/canvas.schema");
-
 const setupSocketServer = (server) => {
   const io = socketIo(server, {
     cors: {
       origin: process.env.CLIENT_URL,
       methods: ["GET", "POST"],
+      // allowedHeaders: ["Content-Type", "Authorization"],
       credentials: true,
     },
   });
