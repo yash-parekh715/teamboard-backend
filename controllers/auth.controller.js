@@ -83,6 +83,8 @@ const googleCallback = (req, res) => {
 const logoutUser = (req, res) => {
   res.cookie("authToken", "", {
     httpOnly: true,
+    secure: true,
+    sameSite: "none",
     expires: new Date(0),
   });
   res.status(200).json({ success: true });
